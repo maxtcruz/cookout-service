@@ -1,24 +1,22 @@
 const express = require("express");
-const mongoose = require("mongoose");
 const bodyParser = require("body-parser"); 
 const cors = require("cors");
-require("dotenv/config");
+require("dotenv").config();
+require("./db");
 
 const app = express();
 
 app.use(cors());
 app.use(bodyParser.json());
 
-const usersRoute = require("./routes/users");
+const userRoute = require("./routes/user");
+app.use("/user", userRoute);
 
-app.use("/user", usersRoute);
+const authRoute = require("./routes/auth");
+app.use("/auth", authRoute);
 
 app.get("/", (_, res) => {
     res.send("home page");
 });
 
-mongoose.connect(process.env.DB_CONNECTION, { useNewUrlParser: true, useUnifiedTopology: true }, () => {
-        console.log("connected to DB.");
-});
-
-app.listen(3001);
+module.exports = app;

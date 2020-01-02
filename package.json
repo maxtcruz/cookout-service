@@ -4,7 +4,7 @@
   "description": "cookout back-end service",
   "main": "index.js",
   "scripts": {
-    "start": "nodemon app.js"
+    "start": "nodemon server.js"
   },
   "author": "Max Cruz",
   "license": "ISC",

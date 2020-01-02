@@ -5,8 +5,8 @@ const User = require("../models/User");
 
 const router = express();
 
-// create user
-router.post("/", async (req, res) => {
+// register
+router.post("/register", async (req, res) => {
     const { 
         username, 
         password,
@@ -14,6 +14,14 @@ router.post("/", async (req, res) => {
         lastName,
         email
     } = req.body;
+    try {
+        const existingUser = await User.findOne({username});
+        if (existingUser) {
+            return res.status(400).send("user with that username already exists.");
+        } 
+    } catch (err) {
+        return res.status(500).json(err);
+    }
     const salt = crypto.randomBytes(16);
     const hashedPassword = await argon2.hash(password, {salt});
     const user = new User({
@@ -24,15 +32,12 @@ router.post("/", async (req, res) => {
         email
     });
     try {
-        const data = await user.save();
-        res.json({
-            username: data.username,
-            firstName: data.firstName,
-            lastName: data.lastName,
-            email: data.email
+        await user.save();
+        res.status(200).json({
+            token: {}
         });
     } catch (err) {
-        res.json({message: err});
+        res.status(400).json(err);
     }
 });
 
@@ -48,25 +53,19 @@ router.post("/login", async (req, res) => {
             try {
                 if (await argon2.verify(user.password, password)) {
                     res.json({
-                        user: {
-                            username: user.username,
-                            firstName: user.firstName,
-                            lastName: user.lastName,
-                            email: user.email
-                        },
                         token: {} // TODO: generate auth token
                     });
                 } else {
                     res.status(401).send("incorrect password");
                 }
-            } catch {
-                res.json({message: err});
+            } catch (err) {
+                res.status(500).json(err);
             }
         } else {
-            res.status(401).send("user doesn't exist.");
+            res.status(404).send("user with given username doesn't exist.");
         }
     } catch (err) {
-        res.json({message: err});
+        res.status(500).json(err);
     }
 });
 

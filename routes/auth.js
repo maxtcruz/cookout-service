@@ -1,6 +1,7 @@
 const express = require("express");
 const argon2 = require("argon2");
 const crypto = require("crypto");
+const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const router = express();
@@ -33,9 +34,10 @@ router.post("/register", async (req, res) => {
     });
     try {
         await user.save();
-        res.status(200).json({
-            token: {}
+        const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {
+            expiresIn: "30d"
         });
+        res.status(200).json({token});
     } catch (err) {
         res.status(400).json(err);
     }
@@ -52,9 +54,10 @@ router.post("/login", async (req, res) => {
         if (user) {
             try {
                 if (await argon2.verify(user.password, password)) {
-                    res.json({
-                        token: {} // TODO: generate auth token
+                    const token = jwt.sign({id: user._id}, process.env.JWT_SECRET, {
+                        expiresIn: "30d"
                     });
+                    res.status(200).json({token});
                 } else {
                     res.status(401).send("incorrect password");
                 }

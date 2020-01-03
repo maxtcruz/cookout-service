@@ -15,7 +15,7 @@ router.post("/register", async (req, res) => {
         lastName,
         email,
         location
-    } = req.body;
+    } = req.body.data;
     try {
         const existingUser = await User.findOne({username});
         if (existingUser) {

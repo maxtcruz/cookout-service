@@ -44,7 +44,7 @@ router.post("/login", async (req, res) => {
     const { 
         username,
         password
-    } = req.body;
+    } = req.body.data;
     try {
         const user = await User.findOne({username}).select("+password").exec();
         if (user) {
